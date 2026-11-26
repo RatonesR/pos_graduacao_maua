@@ -1,0 +1,31 @@
+FROM apache/airflow:2.10.5-python3.11
+
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+
+# Corrige o conflito de SSL para o boto3 rapidamente
+RUN pip install --no-cache-dir --upgrade pyopenssl cryptography
+
+# Instala as bibliotecas do Lakehouse com versões compatíveis fixadas
+RUN pip install --no-cache-dir \
+    astronomer-cosmos==1.11.0 \
+    apache-airflow-providers-standard \
+    boto3 \
+    "dlt[duckdb,parquet]==1.8.0" \
+    "pyiceberg[s3fs,sql-sqlite]==0.9.0" \
+    pandera==0.23.1 \
+    pyarrow==17.0.0 \
+    pandas \
+    scikit-learn \
+    xgboost
+
+# Ambiente virtual isolado para o dbt-core + DuckDB
+RUN python -m venv /opt/airflow/dbt_venv && \
+    /opt/airflow/dbt_venv/bin/pip install --no-cache-dir \
+    dbt-core==1.9.4 \
+    dbt-duckdb==1.2.1

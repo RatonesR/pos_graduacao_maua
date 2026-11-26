@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: slv_clientes
+    columns:
+      - name: cliente_id
+        tests:
+          - unique
+          - not_null
+      - name: email
+        tests:
+          - not_null
+
+  - name: slv_pedidos
+    columns:
+      - name: pedido_id
+        tests:
+          - unique
+          - not_null
+      - name: cliente_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('slv_clientes')
+              field: cliente_id
+
+  - name: gold_feature_store_churn
+    columns:
+      - name: cliente_id
+        tests:
+          - unique
+          - not_null
+      - name: flag_risco_churn
+        tests:
+          - accepted_values:
+              values: [0, 1]
